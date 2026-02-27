@@ -47,6 +47,8 @@ Build the tokei flags:
 
 ## Step 2: Run Tokei
 
+Shell-quote all path arguments before passing to tokei. Validate language filter values against the known mapping above before using in `-t` flag.
+
 Run **all three commands in a single message** (parallel Bash calls):
 
 1. **Full project** (JSON): `tokei <paths> <artifact_excludes> -o json`
@@ -54,6 +56,8 @@ Run **all three commands in a single message** (parallel Bash calls):
 3. **Production files by size**: same as #2 but with `-f -o json`
 
 If tokei is not installed, tell the user: `brew install tokei`
+
+If the JSON output is empty or contains no language entries, output a report with all-zero metrics and `VERDICT: 0 over limit, 0 warnings`.
 
 ## Step 3: Calculate Metrics
 

@@ -46,7 +46,7 @@ These are the user's conventions — respect them exactly.
 
 For each `OVER` file:
 
-1. **Read the full file** using the Read tool
+1. **Read the full file** using the Read tool. If a file cannot be read (deleted, moved, or permission error), note it as "file not found / unreadable" and continue with the remaining files.
 2. **Identify concrete extraction candidates** — match the file's contents against the project's extraction rules. For each:
    - Describe the block of code
    - Estimate how many lines the extraction would save

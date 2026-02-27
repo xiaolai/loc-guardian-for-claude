@@ -92,7 +92,7 @@ After the verdict, if no config file exists, add: `*Run /loc-guardian:init to co
 
 ## Raw File Data Block
 
-When there are over-limit or warning files, append a fenced data block after the verdict for downstream consumption:
+Always append a fenced data block after the verdict for downstream consumption (even if empty):
 
 ~~~
 ```loc-data

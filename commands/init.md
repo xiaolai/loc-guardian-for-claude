@@ -1,7 +1,7 @@
 ---
 description: "Initialize loc-guardian for this project — set LOC limit and extraction rules."
 model: sonnet
-allowed-tools: Read, Write, Bash, AskUserQuestion
+allowed-tools: Read, Write, AskUserQuestion
 ---
 
 Initialize loc-guardian for this project by creating `.claude/loc-guardian.local.md`.
@@ -13,9 +13,9 @@ Read `.claude/loc-guardian.local.md` if it exists. If it does, show the current 
 ## Step 2: Detect Project Context
 
 Run these in parallel to understand the project:
-- `ls` the project root to see the file structure
-- Check for language markers: `package.json` (JS/TS), `Cargo.toml` (Rust), `pyproject.toml` / `setup.py` / `requirements.txt` (Python), `go.mod` (Go), `Gemfile` (Ruby), `pom.xml` / `build.gradle` (Java/Kotlin), `*.sln` / `*.csproj` (C#), `mix.exs` (Elixir), `Package.swift` (Swift)
-- Check for frameworks: look at dependencies in the manifest file (React, Vue, Svelte, Django, Flask, FastAPI, Rails, Spring, etc.)
+- Read the project root directory listing to see the file structure
+- Check for language markers by reading: `package.json` (JS/TS), `Cargo.toml` (Rust), `pyproject.toml` / `setup.py` / `requirements.txt` (Python), `go.mod` (Go), `Gemfile` (Ruby), `pom.xml` / `build.gradle` (Java/Kotlin), `*.sln` / `*.csproj` (C#), `mix.exs` (Elixir), `Package.swift` (Swift)
+- Check for frameworks: look at dependencies in the manifest file (React, Vue, Svelte, Django, Flask, FastAPI, Rails, Spring, and other frameworks detected in the manifest)
 
 ## Step 3: Ask the User
 
@@ -31,7 +31,7 @@ Use AskUserQuestion to ask:
 
 ## Step 4: Write Config
 
-Create `.claude/` directory if it doesn't exist. Write `.claude/loc-guardian.local.md` with:
+Create `.claude/` directory if it doesn't exist. Only write to `.claude/loc-guardian.local.md`. Write it with:
 
 - YAML frontmatter containing `max_pure_loc`
 - Markdown body containing the extraction rules exactly as the user confirmed them
