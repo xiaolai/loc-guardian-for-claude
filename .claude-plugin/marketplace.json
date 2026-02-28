@@ -8,7 +8,7 @@
         "repo": "xiaolai/loc-guardian-for-claude"
       },
       "description": "Enforce per-file pure LOC limits with automated optimization strategies — counts, flags violations, and provides opus-powered extraction plans",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "author": {
         "name": "xiaolai"
       },

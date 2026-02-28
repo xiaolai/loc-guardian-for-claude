@@ -18,11 +18,41 @@ Enforce per-file pure LOC limits with automated optimization strategies.
 | `/loc-guardian:scan python` | Count only Python files |
 | `/loc-guardian:scan src/` | Count only files under `src/` |
 
-## Setup
+Part of the [xiaolai plugin marketplace](https://github.com/xiaolai/claude-plugin-marketplace).
 
-1. Install tokei: `brew install tokei`
-2. Install the plugin
-3. Run `/loc-guardian:init` in your project to set your LOC limit and extraction rules
+## Installation
+
+### Prerequisites
+
+Install [tokei](https://github.com/XAMPPRocky/tokei):
+
+```bash
+brew install tokei
+```
+
+### Install the plugin
+
+Add the marketplace (once):
+
+```
+/plugin marketplace add xiaolai/claude-plugin-marketplace
+```
+
+Then install:
+
+```
+/plugin install loc-guardian@xiaolai
+```
+
+| Scope | Command | Effect |
+|-------|---------|--------|
+| **User** (default) | `/plugin install loc-guardian@xiaolai` | Available in all your projects |
+| **Project** | `/plugin install loc-guardian@xiaolai --scope project` | Shared with team via `.claude/settings.json` |
+| **Local** | `/plugin install loc-guardian@xiaolai --scope local` | Only you, only this repo |
+
+### Setup
+
+Run `/loc-guardian:init` in your project to set your LOC limit and extraction rules
 
 ## How it works
 
