@@ -19,7 +19,7 @@ The counter outputs a structured **verdict line** and **`loc-data` block** that 
 .claude-plugin/plugin.json       — Plugin identity & metadata
 commands/
   scan.md                        — /loc-guardian:scan — orchestrator (counter → optimizer)
-  init.md                        — /loc-guardian:init — per-project config setup (sonnet)
+  init.md                        — /loc-guardian:init — per-project config setup (inherits session model)
 agents/
   counter.md                     — haiku: runs tokei, computes metrics, checks limits
   optimizer.md                   — opus: reads files, provides extraction strategies

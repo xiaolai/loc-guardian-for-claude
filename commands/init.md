@@ -1,6 +1,5 @@
 ---
 description: "Initialize loc-guardian for this project — set LOC limit and extraction rules."
-model: sonnet
 allowed-tools: Read, Write, Glob, AskUserQuestion
 ---
 
