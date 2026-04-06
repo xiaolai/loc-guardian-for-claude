@@ -1,4 +1,5 @@
 ---
+name: scan
 description: "Count LOC, enforce per-file limits, get optimization strategies."
 argument-hint: "[language] [path]"
 ---

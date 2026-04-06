@@ -1,4 +1,5 @@
 ---
+name: init
 description: "Initialize loc-guardian for this project — set LOC limit and extraction rules."
 allowed-tools: Read, Write, Glob, AskUserQuestion
 ---
