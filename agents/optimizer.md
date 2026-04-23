@@ -12,6 +12,14 @@ description: |
   The counter flagged violations. The optimizer reads each file and provides line-level extraction suggestions.
   </commentary>
   </example>
+
+  <example>
+  Context: counter's loc-data block contains only WARN lines (no OVER lines) — files are in the 80%+ warning zone but none have exceeded the limit.
+  assistant: "No files are over the limit, but some are in the warning zone. I'll run the lighter warning-zone analysis — reading each WARN file and noting one obvious extraction candidate per file to prevent it from going over."
+  <commentary>
+  No OVER files — optimizer runs lighter WARN-only pass per the documented workflow. Per Step 3, each warning-zone file gets a single-line suggestion with one extraction candidate, rather than the full extraction + optimization report reserved for over-limit files.
+  </commentary>
+  </example>
 model: opus
 color: red
 tools: Read, Grep, Glob

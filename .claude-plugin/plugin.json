@@ -1,6 +1,6 @@
 {
   "name": "loc-guardian",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Enforce per-file pure LOC limits with automated optimization strategies \u2014 counts, flags violations, and provides opus-powered extraction plans",
   "author": {
     "name": "xiaolai"
