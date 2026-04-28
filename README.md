@@ -80,4 +80,4 @@ The extraction rules are yours — tailored to your language, framework, and con
 
 ## License
 
-MIT
+ISC
