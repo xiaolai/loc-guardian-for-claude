@@ -1,5 +1,7 @@
 # loc-guardian
 
+[![Validated by NLPM](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/xiaolai/loc-guardian-for-claude/main/nlpm-badge.json)](https://github.com/xiaolai/loc-guardian-for-claude/blob/main/nlpm-badge.json)
+
 Enforce per-file pure LOC limits with automated optimization strategies.
 
 ## What it does
