@@ -59,7 +59,10 @@ Per-project config: `.claude/loc-guardian.local.md`
 
 ## Data Flow: counter → scan → optimizer
 
-1. `reduce-loc.mjs` ends the report with `**VERDICT: N over limit, M warnings | limit: L**`
+1. `reduce-loc.mjs` ends the report with `**VERDICT: N over limit, M warnings | limit: L**`,
+   plus ` | K overrides[, J ignored]` when any per-file ceiling was in force — so a
+   relaxed run cannot be read as a strict one. Anything matching the verdict must
+   accept that optional suffix.
 2. It appends a `loc-data` fenced block, one JSON object per line:
    `{"status":"OVER","path":"…","loc":482}`
 3. Counter relays that stdout unchanged — it adds no numbers of its own

@@ -35,7 +35,32 @@ run through a language model can be silently wrong.
 ## Step 0: Read Config
 
 Check whether `.claude/loc-guardian.local.md` exists in the project root. If it does, parse
-its YAML frontmatter for `max_pure_loc`. Default: **350**.
+its YAML frontmatter for:
+
+- `max_pure_loc` — the ceiling for an ordinary file. Default: **350**.
+- `overrides` — an optional map of glob → ceiling, for files the flat limit is
+  knowingly wrong about. A composition root, a window controller and a render loop are
+  each one thing, and their honest ceiling is not a leaf module's.
+- `ignore` — an optional list of globs exempt from the limit entirely (generated code,
+  vendored files).
+
+Both optional keys are passed through as repeated flags:
+
+```yaml
+max_pure_loc: 350
+overrides:
+  'src/main/index.ts': 1500
+  'src/renderer/**': 600
+ignore:
+  - 'src/generated/**'
+```
+
+becomes `--override 'src/main/index.ts=1500' --override 'src/renderer/**=600'
+--ignore 'src/generated/**'`.
+
+Most specific wins: an exact path beats a glob covering it, so a directory-wide
+relaxation can still carry a stricter exception inside it. The verdict line reports how
+many overrides were in force, so a relaxed run cannot be read as a strict one.
 
 Remember whether the file existed — you pass `--no-config` below when it did not.
 
@@ -83,7 +108,8 @@ tokei . <artifact_excludes> -o json > "$D/all.json"  || exit 1
 tokei . <artifact_excludes> <test_excludes> -o json > "$D/prod.json" || exit 1
 
 node "$PLUGIN/scripts/reduce-loc.mjs" \
-  --all "$D/all.json" --prod "$D/prod.json" --limit 350
+  --all "$D/all.json" --prod "$D/prod.json" --limit 350 \
+  <one --override 'glob=lines' per config entry, one --ignore 'glob' per ignore entry>
 ```
 
 Why each line is there:

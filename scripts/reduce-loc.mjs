@@ -32,7 +32,7 @@ import { readFileSync } from 'node:fs';
 /* ---------- argument parsing ---------- */
 
 function parseArgs(argv) {
-  const out = { warnPct: 80, noConfig: false, check: false };
+  const out = { warnPct: 80, noConfig: false, check: false, overrides: [], ignores: [] };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === '--all') out.all = argv[++i];
@@ -41,6 +41,8 @@ function parseArgs(argv) {
     else if (a === '--warn-pct') out.warnPct = Number(argv[++i]);
     else if (a === '--no-config') out.noConfig = true;
     else if (a === '--check') out.check = true;
+    else if (a === '--override') out.overrides.push(parseOverride(argv[++i]));
+    else if (a === '--ignore') out.ignores.push(String(argv[++i]));
     else die(`unknown argument: ${a}`);
   }
   if (!out.all) die('missing --all <path>');
@@ -52,6 +54,74 @@ function parseArgs(argv) {
     die('--warn-pct must be between 1 and 99');
   }
   return out;
+}
+
+/**
+ * `<glob>=<lines>` -- a ceiling for the files that glob matches.
+ *
+ * Split on the LAST `=` so a path may contain one. A limit that is not a
+ * positive whole number is fatal rather than ignored: an override silently
+ * dropped is a gate that is quietly stricter than the config says, which is
+ * the failure people spend an afternoon on.
+ */
+function parseOverride(spec) {
+  const text = String(spec ?? '');
+  const at = text.lastIndexOf('=');
+  if (at <= 0) die(`--override needs <glob>=<lines>, got: ${text}`);
+  const glob = text.slice(0, at);
+  const limit = Number(text.slice(at + 1));
+  if (!Number.isInteger(limit) || limit <= 0) {
+    die(`--override limit must be a positive whole number, got: ${text.slice(at + 1)}`);
+  }
+  return { glob, limit };
+}
+
+/**
+ * Glob to anchored RegExp. `*` stops at a slash; `**` does not.
+ *
+ * Deliberately small: this matches repo-relative paths, not a shell. The one
+ * subtlety is that `a/**\/b` must also match `a/b` -- a `**` standing for no
+ * directories at all is the common case in `src/**\/*.ts`, and a matcher that
+ * misses it silently applies the wrong ceiling.
+ */
+function globToRegExp(glob) {
+  let body = '';
+  for (let i = 0; i < glob.length; i++) {
+    const c = glob[i];
+    if (c === '*') {
+      if (glob[i + 1] === '*') {
+        i++;
+        if (glob[i + 1] === '/') { i++; body += '(?:[^/]+/)*'; }
+        else body += '.*';
+      } else body += '[^/]*';
+    } else if (c === '?') body += '[^/]';
+    else body += c.replace(/[.+^${}()|[\]\\]/, '\\$&');
+  }
+  return new RegExp(`^${body}$`);
+}
+
+/**
+ * The ceiling that applies to one file.
+ *
+ * Most specific wins, and "specific" means fewest wildcards first, then the
+ * longer pattern. An exact path therefore always beats `src/**` covering it,
+ * which is what lets a directory-wide relaxation carry a stricter exception
+ * inside it.
+ */
+function limitFor(path, base, overrides) {
+  let best = null;
+  for (const o of overrides) {
+    if (!globToRegExp(o.glob).test(path)) continue;
+    const stars = (o.glob.match(/\*/g) ?? []).length;
+    if (
+      best === null ||
+      stars < best.stars ||
+      (stars === best.stars && o.glob.length > best.glob.length)
+    ) {
+      best = { ...o, stars };
+    }
+  }
+  return best === null ? base : best.limit;
 }
 
 function die(msg) {
@@ -185,8 +255,20 @@ const prodFiles = fileEntries(loadJson(args.prod, 'prod'));
  * 350 is clean, 281 warns). The two sets are disjoint: an over-limit file is
  * never also counted as a warning.
  */
-const over = prodFiles.filter((f) => f.code > limit);
-const warn = prodFiles.filter((f) => f.code > warnAt && f.code <= limit);
+const ignored = (p) => args.ignores.some((g) => globToRegExp(g).test(p));
+/*
+ * Each file carries the ceiling that applies to IT, not the global one.
+ *
+ * A root -- a composition root, a window controller, a render loop -- is one
+ * thing whose honest ceiling is not a leaf module's. Without this the gate is
+ * knowingly wrong about those files, and a gate that is usually wrong is one
+ * people learn to ignore, which costs more than the files it was flagging.
+ */
+const scored = prodFiles
+  .filter((f) => !ignored(f.path))
+  .map((f) => ({ ...f, limit: limitFor(f.path, limit, args.overrides) }));
+const over = scored.filter((f) => f.code > f.limit);
+const warn = scored.filter((f) => f.code > (f.limit * args.warnPct) / 100 && f.code <= f.limit);
 
 const testLoc = Math.max(0, all.code - prod.code);
 const out = [];
@@ -235,7 +317,7 @@ if (over.length > 0) {
   out.push(table(
     ['#', 'File', 'Pure LOC', 'Limit', 'Over By'],
     ['l', 'l', 'r', 'r', 'r'],
-    over.map((f, i) => `| ${i + 1} | ${cellPath(f.path)} | ${num(f.code)} | ${num(limit)} | +${num(f.code - limit)} |`)
+    over.map((f, i) => `| ${i + 1} | ${cellPath(f.path)} | ${num(f.code)} | ${num(f.limit)} | +${num(f.code - f.limit)} |`)
   ), '');
 }
 
@@ -245,12 +327,20 @@ if (warn.length > 0) {
   out.push(table(
     ['#', 'File', 'Pure LOC', 'Limit', 'Usage'],
     ['l', 'l', 'r', 'r', 'r'],
-    warn.map((f, i) => `| ${i + 1} | ${cellPath(f.path)} | ${num(f.code)} | ${num(limit)} | ${pct(f.code, limit)}% |`)
+    warn.map((f, i) => `| ${i + 1} | ${cellPath(f.path)} | ${num(f.code)} | ${num(f.limit)} | ${pct(f.code, f.limit)}% |`)
   ), '');
 }
 
 /* Verdict + machine-readable block */
-out.push(`**VERDICT: ${over.length} over limit, ${warn.length} warnings | limit: ${limit}**`, '');
+const relaxed =
+  args.overrides.length > 0 || args.ignores.length > 0
+    ? ` | ${String(args.overrides.length)} override${args.overrides.length === 1 ? '' : 's'}` +
+      (args.ignores.length > 0 ? `, ${String(args.ignores.length)} ignored` : '')
+    : '';
+out.push(
+  `**VERDICT: ${over.length} over limit, ${warn.length} warnings | limit: ${limit}${relaxed}**`,
+  '',
+);
 if (args.noConfig) out.push('*Run /loc-guardian:init to configure.*', '');
 
 /*

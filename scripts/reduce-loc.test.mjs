@@ -219,6 +219,105 @@ check('exits 1 on an empty file rather than reporting zeros', () => {
   assert(err.includes('is empty'), `unexpected stderr: ${err}`);
 });
 
+/* --- per-file ceilings --- */
+
+check('an override lifts the ceiling for the file it names, and nothing else', () => {
+  const out = run({ 'a.json': ALL, 'p.json': PROD },
+    ['--all', 'a.json', '--prod', 'p.json', '--limit', '10', '--override', 'src/big.ts=20']);
+  has(out, '**VERDICT: 0 over limit, 1 warnings | limit: 10 | 1 override**');
+  assert(!out.includes('"status":"OVER"'), 'big.ts is within its own ceiling');
+  // warn.ts still measured against the base limit, not the override
+  has(out, '{"status":"WARN","path":"src/warn.ts","loc":9}');
+});
+
+check('the verdict says the gate was relaxed, so a loose run cannot read as a strict one', () => {
+  const out = run({ 'a.json': ALL, 'p.json': PROD },
+    ['--all', 'a.json', '--prod', 'p.json', '--limit', '10',
+     '--override', 'src/big.ts=20', '--ignore', 'src/warn.ts']);
+  has(out, '| 1 override, 1 ignored**');
+});
+
+check('the over-limit table reports the ceiling that was actually applied', () => {
+  const out = run({ 'a.json': ALL, 'p.json': PROD },
+    ['--all', 'a.json', '--prod', 'p.json', '--limit', '10', '--override', 'src/big.ts=11']);
+  has(out, '| `src/big.ts` | 12 | 11 | +1 |');
+});
+
+check('a directory glob covers files under it', () => {
+  const out = run({ 'a.json': ALL, 'p.json': PROD },
+    ['--all', 'a.json', '--prod', 'p.json', '--limit', '10', '--override', 'src/**=20']);
+  has(out, '**VERDICT: 0 over limit');
+});
+
+check('`**` also matches when it stands for no directory at all', () => {
+  // `src/**/*.ts` must cover `src/big.ts`, not only `src/a/big.ts`. A matcher
+  // that misses this applies the base limit while the config says otherwise.
+  const out = run({ 'a.json': ALL, 'p.json': PROD },
+    ['--all', 'a.json', '--prod', 'p.json', '--limit', '10', '--override', 'src/**/*.ts=20']);
+  has(out, '**VERDICT: 0 over limit');
+});
+
+check('an exact path beats a directory glob covering it', () => {
+  const out = run({ 'a.json': ALL, 'p.json': PROD },
+    ['--all', 'a.json', '--prod', 'p.json', '--limit', '10',
+     '--override', 'src/**=50', '--override', 'src/big.ts=11']);
+  has(out, '| `src/big.ts` | 12 | 11 | +1 |');
+  has(out, '**VERDICT: 1 over limit');
+});
+
+check('an ignored file is not measured at all', () => {
+  const out = run({ 'a.json': ALL, 'p.json': PROD },
+    ['--all', 'a.json', '--prod', 'p.json', '--limit', '10', '--ignore', 'src/big.ts']);
+  has(out, '**VERDICT: 0 over limit, 1 warnings');
+  assert(!out.includes('"path":"src/big.ts"'), 'ignored file must not appear in loc-data');
+});
+
+check('--check still fails when a file is over its own raised ceiling', () => {
+  run({ 'a.json': ALL, 'p.json': PROD },
+    ['--all', 'a.json', '--prod', 'p.json', '--limit', '10', '--override', 'src/big.ts=11', '--check'], 2);
+});
+
+check('exits 1: an override without a limit', () => {
+  const err = run({ 'a.json': ALL, 'p.json': PROD },
+    ['--all', 'a.json', '--prod', 'p.json', '--limit', '10', '--override', 'src/big.ts'], 1);
+  assert(err.includes('<glob>=<lines>'), `unexpected stderr: ${err}`);
+});
+
+check('exits 1: an override whose limit is not a number', () => {
+  // Dropped silently, this would make the gate quietly stricter than the
+  // config claims -- the failure that costs an afternoon to find.
+  const err = run({ 'a.json': ALL, 'p.json': PROD },
+    ['--all', 'a.json', '--prod', 'p.json', '--limit', '10', '--override', 'src/big.ts=lots'], 1);
+  assert(err.includes('positive whole number'), `unexpected stderr: ${err}`);
+});
+
+check('every verdict shape still matches the pattern scan.md validates against', () => {
+  /*
+   * The command refuses to trust a scan whose verdict does not match an ANCHORED
+   * pattern, so widening the verdict line without widening that pattern turns
+   * every successful scan into a reported failure. Adding the override suffix
+   * did exactly that once; this pins the two together.
+   *
+   * Kept in sync by hand with `commands/scan.md` step 2 -- if you change one,
+   * this test is what tells you about the other.
+   */
+  const SCAN_MD =
+    /^\*\*VERDICT: [0-9]+ over limit, [0-9]+ warnings \| limit: [0-9]+( \| [0-9]+ overrides?(, [0-9]+ ignored)?)?\*\*$/;
+  const runs = [
+    [],
+    ['--override', 'src/big.ts=20'],
+    ['--override', 'src/big.ts=20', '--override', 'src/a.ts=99'],
+    ['--override', 'src/big.ts=20', '--ignore', 'src/warn.ts'],
+  ];
+  for (const extra of runs) {
+    const out = run({ 'a.json': ALL, 'p.json': PROD },
+      ['--all', 'a.json', '--prod', 'p.json', '--limit', '10', ...extra]);
+    const line = out.split('\n').find((l) => l.startsWith('**VERDICT:'));
+    assert(line !== undefined, `no verdict line for: ${extra.join(' ')}`);
+    assert(SCAN_MD.test(line), `scan.md would reject: ${JSON.stringify(line)}`);
+  }
+});
+
 rmSync(DIR, { recursive: true, force: true });
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

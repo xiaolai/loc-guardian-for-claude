@@ -12,7 +12,7 @@ allowed-tools: Task, Bash, Read
    it contains a line matching this pattern exactly:
 
    ```
-   ^\*\*VERDICT: [0-9]+ over limit, [0-9]+ warnings \| limit: [0-9]+\*\*$
+   ^\*\*VERDICT: [0-9]+ over limit, [0-9]+ warnings \| limit: [0-9]+( \| [0-9]+ overrides?(, [0-9]+ ignored)?)?\*\*$
    ```
 
    Check for a line that *matches* the pattern — not for output that merely *contains* the

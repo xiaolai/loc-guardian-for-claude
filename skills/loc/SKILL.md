@@ -29,7 +29,14 @@ version: 0.1.0
 ## Per-File Limit Config
 
 - Default limit: **350** pure LOC per file
-- Config source: `.claude/loc-guardian.local.md` YAML frontmatter field `max_pure_loc`
+- Config source: `.claude/loc-guardian.local.md` YAML frontmatter
+  - `max_pure_loc` — the ceiling for an ordinary file
+  - `overrides` — map of glob → ceiling, for files the flat limit is knowingly wrong
+    about. Most specific wins: an exact path beats a glob covering it.
+  - `ignore` — globs exempt from the limit entirely
+- A limit is for a LEAF module. Roots — composition roots, window controllers, render
+  loops — are one thing each, and a gate that is usually wrong about them is one people
+  learn to ignore. Record the ceiling and the reason rather than leaving the gate red.
 - Boundaries, fixed by test in `scripts/reduce-loc.test.mjs`:
   - **over limit** := `code > limit` — a file of exactly the limit is not over it
   - **warning zone** := `code > 80% of limit` **and** `code <= limit` — a file at exactly
