@@ -8,9 +8,10 @@ version: 0.1.0
 
 ## Tokei Conventions
 
-- Tool: `tokei` (install via `brew install tokei`)
+- Tool: `tokei` — installable via `brew` (macOS/Linux), `cargo install tokei` (anywhere Rust is available), `scoop` (Windows), or `apt`/`dnf`/`pacman`. Never present `brew` as the only option.
 - Always exclude non-source artifacts: `.venv`, `__pycache__`, `node_modules`, `.git`, `dist`, `build`, `*.lock`, `*-lock.yaml`, `*-lock.json`
-- Test directories to exclude for production counts: `tests`, `test`, `spec`, `__tests__`, `__test__`, `e2e`, `integration-tests`, `test-utils`, `fixtures`, `mocks`
+- Test directories to exclude for production counts: `tests`, `test`, `spec`, `__tests__`, `__test__`, `__mocks__`, `__fixtures__`, `__snapshots__`, `e2e`, `integration-tests`, `test-utils`, `testdata`, `fixtures`, `mocks`
+- **`--exclude` matches a literal path segment, not a substring.** `--exclude fixtures` does NOT exclude `__fixtures__`, and `--exclude mocks` does NOT exclude `__mocks__`. Every dunder convention needs its own entry alongside the bare form — when adding a directory here, add both spellings or the bare one will silently miss the dunder one.
 - Test file patterns to exclude: `*_test.*`, `*.test.*`, `*_spec.*`, `*.spec.*`, `test_*.*`
 - Language name mapping (user input → tokei type): `js`/`javascript` → `JavaScript`, `ts`/`typescript` → `TypeScript`, `cpp`/`c++` → `C++`, `py`/`python` → `Python`, `rb`/`ruby` → `Ruby`, `sh`/`bash`/`shell` → `Shell`, `rs`/`rust` → `Rust`, `kt`/`kotlin` → `Kotlin`
 

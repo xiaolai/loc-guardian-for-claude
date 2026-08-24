@@ -28,9 +28,14 @@ Part of the [xiaolai plugin marketplace](https://github.com/xiaolai/claude-plugi
 
 Install [tokei](https://github.com/XAMPPRocky/tokei):
 
-```bash
-brew install tokei
-```
+| Platform | Command |
+|---|---|
+| macOS / Linux (Homebrew) | `brew install tokei` |
+| Any platform with Rust | `cargo install tokei` |
+| Debian / Ubuntu | `apt install tokei` |
+| Fedora | `dnf install tokei` |
+| Arch | `pacman -S tokei` |
+| Windows | `scoop install tokei` |
 
 ### Install the plugin
 

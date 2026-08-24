@@ -22,7 +22,7 @@ description: |
   </example>
 model: opus
 color: red
-tools: Read, Grep, Glob
+tools: Read, Grep, Glob, Bash
 skills:
   - loc-guardian:loc-optimization
 ---
@@ -57,13 +57,28 @@ For each `OVER` file:
 1. **Read the full file** using the Read tool. If a file cannot be read (deleted, moved, or permission error), note it as "file not found / unreadable" and continue with the remaining files.
 2. **Identify concrete extraction candidates** — match the file's contents against the project's extraction rules. For each:
    - Describe the block of code
-   - Estimate how many lines the extraction would save
+   - **Measure** how many pure LOC the extraction would save (see "Measuring a range" below) — do not estimate from a whole-file code-to-raw ratio
    - Name the target file (following the project's naming conventions)
 3. **Identify code optimization opportunities** — beyond extraction:
    - Duplicated logic that can be consolidated
    - Overly verbose patterns that can be simplified
    - Dead code (unused imports, unreachable branches, commented-out blocks)
-   - Estimate line savings for each
+   - Measure line savings for each, the same way
+
+### Measuring a range
+
+Pure LOC is code lines only — not raw lines. To price a proposed extraction, slice the range to a temp file that **keeps the source file's extension**, then count it:
+
+```bash
+sed -n '620,780p' src/main/index.ts > "${TMPDIR:-/tmp}/loc-range.ts"
+tokei "${TMPDIR:-/tmp}/loc-range.ts" -o json
+```
+
+Read the `code` field — that is the pure LOC the extraction removes. Subtract roughly one line for the import/require the extraction adds back to the source file.
+
+The extension matters: tokei picks the language from it, and a range saved with the wrong extension counts as zero. `tokei -` and `tokei -i stdin` do **not** count source from stdin — `-i` reads a previous tokei run's output, not code. Both exit 1.
+
+Bash is for measurement only — `sed` and `tokei` against temp files. Never edit, move, or delete a project file; this agent recommends changes, it does not apply them.
 
 ### Step 3: Analyze Warning-Zone Files
 
@@ -86,7 +101,7 @@ For each over-limit file, output:
 **Optimizations:**
 1. Lines ~X–Y: [description] (~Z lines saved)
 
-**Estimated result:** ~N pure LOC after changes
+**Measured result:** N pure LOC after changes
 ```
 
 For warning-zone files, output a single line:
@@ -102,4 +117,5 @@ For warning-zone files, output a single line:
 - Respect the project's extraction rules. If the user says types go to `models.py`, don't suggest `types.py`.
 - If no project extraction rules exist, use the generic patterns from your loc-optimization skill, and note that the user should run `/loc-guardian:init`.
 - Prioritize suggestions by line savings — biggest wins first.
-- The goal is to get every file under the limit. Show the estimated post-optimization LOC to prove it's achievable.
+- Report measured counts, not estimates. If a range genuinely cannot be measured, say so explicitly for that item rather than presenting a guess as a count.
+- The goal is to get every file under the limit. Show the measured post-optimization LOC to prove it's achievable.

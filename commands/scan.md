@@ -2,6 +2,7 @@
 name: scan
 description: "Count LOC, enforce per-file limits, get optimization strategies."
 argument-hint: "[language] [path]"
+allowed-tools: Task
 ---
 
 1. Delegate to **counter** agent (`subagent_type: "loc-guardian:counter"`, `model: "haiku"`). Prompt: `Count lines of code and check limits. Arguments: $ARGUMENTS`

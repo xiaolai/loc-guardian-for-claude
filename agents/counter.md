@@ -49,13 +49,15 @@ Build the tokei flags:
 
 Shell-quote all path arguments before passing to tokei. Validate language filter values against the known mapping above before using in `-t` flag.
 
-Run **all three commands in a single message** (parallel Bash calls):
+Run **both commands in a single message** (parallel Bash calls):
 
 1. **Full project** (JSON): `tokei <paths> <artifact_excludes> -o json`
 2. **Production code** (JSON): same as #1, plus `--exclude` for every test directory and test file pattern listed in your LOC skill
-3. **Production files by size**: same as #2 but with `-f -o json`
 
-If tokei is not installed, tell the user: `brew install tokei`
+**Do NOT add `-f`.** For JSON output it adds no per-file data — the `reports` array is present either way, and `-f` only changes the order of entries within it. Per-file data comes from command 2's `reports` array. A third `-f` call is a wasted process and a duplicated payload.
+
+If tokei is not installed, tell the user how to install it for **their** platform — do not assume macOS:
+`brew install tokei` (macOS/Linux), `cargo install tokei` (anywhere Rust is available), `scoop install tokei` (Windows), or the distro package manager (`apt`, `dnf`, `pacman`).
 
 If the JSON output is empty or contains no language entries, output a report with all-zero metrics and `VERDICT: 0 over limit, 0 warnings`.
 
@@ -69,11 +71,11 @@ Compute all metrics as defined in your LOC skill:
 - **Test LOC** = (command 1 `code`) minus (command 2 `code`)
 - Other ratios per the skill definitions
 
-From command 3, identify the **top 10 largest production files** by code lines.
+From command 2's `reports` array, identify the **top 10 largest production files** by code lines.
 
 ## Step 4: Check File Limits
 
-Using the per-file data from command 3, check every production file's pure LOC (the `code` field) against the configured limit:
+Using the per-file data from command 2's `reports` array, check every production file's pure LOC (the `code` field) against the configured limit:
 
 - **Over limit** (> max_pure_loc): collect as OVER
 - **Warning zone** (> 80% of max_pure_loc): collect as WARN
