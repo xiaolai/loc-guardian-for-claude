@@ -26,7 +26,11 @@ Part of the [xiaolai plugin marketplace](https://github.com/xiaolai/claude-plugi
 
 ### Prerequisites
 
-Install [tokei](https://github.com/XAMPPRocky/tokei):
+**Node.js 18+** — the counting and formatting run in a small dependency-free script, so the
+numbers come from tested code rather than from a model's arithmetic. Check with `node --version`.
+(Claude Code's native builds do not bundle Node, so this may need installing separately.)
+
+And [tokei](https://github.com/XAMPPRocky/tokei):
 
 | Platform | Command |
 |---|---|
@@ -65,8 +69,33 @@ Run `/loc-guardian:init` in your project to set your LOC limit and extraction ru
 
 ## How it works
 
-1. **Counter** (haiku) — runs tokei, computes metrics, flags violations
-2. **Optimizer** (opus) — reads over-limit files, suggests line-level extractions following your project's rules. Only invoked when there are violations.
+1. **Counter** (haiku) — works out what to scan, runs tokei, relays the report. tokei's JSON
+   goes to a temp file and never enters a model context, so cost stays flat as the repository
+   grows: on a 4,864-file tree, 2,660 KB of JSON became a 55 KB report.
+2. **`scripts/reduce-loc.mjs`** — computes every metric and formats every table. Counting lines
+   is arithmetic, so it lives in tested code (`node scripts/reduce-loc.test.mjs`).
+3. **Optimizer** (opus) — reads each over-limit file and *measures* the pure LOC each proposed
+   extraction would save, rather than estimating it from a whole-file ratio. Only invoked when
+   files are over the limit.
+
+## Using it in CI or a hook
+
+The scan is a plain shell pipeline; no model is needed to enforce the limit:
+
+```bash
+D=$(mktemp -d) && trap 'rm -rf "$D"' EXIT
+tokei . -o json > "$D/all.json"
+tokei . --exclude tests --exclude __tests__ --exclude __fixtures__ -o json > "$D/prod.json"
+node scripts/reduce-loc.mjs --all "$D/all.json" --prod "$D/prod.json" --limit 350 --check
+```
+
+| Exit | Meaning |
+|-----:|---------|
+| `0` | scan valid, nothing over the limit |
+| `1` | the scan did not happen (bad arguments, unreadable or malformed input) |
+| `2` | scan valid, at least one file over the limit — only with `--check` |
+
+`1` and `2` are deliberately distinct: a broken scan must never look like a clean one.
 
 ## Configuration
 

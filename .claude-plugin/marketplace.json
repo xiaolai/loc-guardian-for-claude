@@ -1,5 +1,11 @@
 {
   "name": "xiaolai",
+  "owner": {
+    "name": "xiaolai"
+  },
+  "metadata": {
+    "description": "loc-guardian — enforce per-file pure LOC limits with automated optimization strategies, by xiaolai"
+  },
   "plugins": [
     {
       "name": "loc-guardian",
@@ -7,8 +13,8 @@
         "source": "github",
         "repo": "xiaolai/loc-guardian-for-claude"
       },
-      "description": "Enforce per-file pure LOC limits with automated optimization strategies \u2014 counts, flags violations, and provides opus-powered extraction plans",
-      "version": "0.1.5",
+      "description": "Enforce per-file pure LOC limits with automated optimization strategies — counts, flags violations, and provides opus-powered extraction plans",
+      "version": "0.2.0",
       "author": {
         "name": "xiaolai"
       },
