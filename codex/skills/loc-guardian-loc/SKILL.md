@@ -1,6 +1,6 @@
 ---
 name: loc-guardian-loc
-description: "Use when counting lines of code, computing LOC metrics, or reading and checking a loc-guardian report (tokei conventions, metric definitions, verdict line, loc-data block)."
+description: "LOC counting with tokei: metrics, limits, reading and checking loc-guardian reports."
 ---
 
 # LOC Metrics Knowledge

@@ -1,6 +1,6 @@
 ---
 name: loc-optimization
-description: Use when analyzing files that exceed pure LOC limits, or when suggesting code optimization opportunities to reduce file size.
+description: "Shrinking files over the pure LOC limit: config format, extraction patterns."
 version: 0.1.0
 ---
 

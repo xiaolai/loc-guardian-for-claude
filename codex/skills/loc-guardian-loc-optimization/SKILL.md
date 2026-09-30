@@ -1,6 +1,6 @@
 ---
 name: loc-guardian-loc-optimization
-description: "Use when analyzing files that exceed a pure LOC limit, or when suggesting code optimization opportunities to reduce file size (config format and fallback extraction patterns)."
+description: "Shrinking files over the pure LOC limit: config format, extraction patterns."
 ---
 
 # LOC Optimization Knowledge

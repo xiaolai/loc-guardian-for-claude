@@ -1,6 +1,6 @@
 ---
 name: loc
-description: Use when counting lines of code, computing LOC metrics, or formatting LOC reports with tokei.
+description: "LOC counting with tokei: metrics, per-file limits, report formats."
 version: 0.1.0
 ---
 
