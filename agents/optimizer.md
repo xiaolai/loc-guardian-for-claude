@@ -3,7 +3,8 @@ name: optimizer
 description: |
   Use this agent to analyze over-limit files and provide concrete optimization strategies.
   This agent is called by the scan command when files exceed the pure LOC limit.
-  It reads the actual file contents and suggests specific extractions.
+  It reads the actual file contents and suggests specific extractions; invoked directly with only warning-zone (WARN) files, it runs a lighter pass with one extraction candidate per file.
+  Not for counting lines of code (use the counter agent) or for a warnings-only scan result, which /loc-guardian:scan reports itself.
 
   <example>
   Context: counter found files over the LOC limit.
@@ -12,17 +13,9 @@ description: |
   The counter flagged violations. The optimizer reads each file and provides line-level extraction suggestions.
   </commentary>
   </example>
-
-  <example>
-  Context: this agent is invoked directly with a loc-data block containing only WARN entries — files in the warning zone, none over the limit.
-  assistant: "No files are over the limit, so I'll run only the lighter warning-zone pass — reading each WARN file and noting one extraction candidate per file to keep it from going over."
-  <commentary>
-  Note that /loc-guardian:scan does NOT dispatch this agent for a warnings-only result; it reports the warnings itself. WARN-only input therefore arises on direct invocation, and Step 3 governs it: one suggestion per file, not the full report reserved for over-limit files.
-  </commentary>
-  </example>
 model: opus
 color: red
-tools: Read, Grep, Glob, Bash
+tools: Read, Glob, Bash
 skills:
   - loc-guardian:loc-optimization
 ---
@@ -65,7 +58,7 @@ For each `OVER` file:
 2. **Identify concrete extraction candidates** — match the file's contents against the project's extraction rules. For each:
    - Describe the block of code
    - **Measure** how many pure LOC the extraction would save (see "Measuring a range" below) — do not estimate from a whole-file code-to-raw ratio
-   - Name the target file (following the project's naming conventions)
+   - Name the target file (following the project's naming conventions). Glob the source file's directory first: match the naming pattern of its sibling files, and if a file with the chosen name already exists, say the extraction goes into that existing file
 3. **Identify code optimization opportunities** — beyond extraction:
    - Duplicated logic that can be consolidated
    - Overly verbose patterns that can be simplified

@@ -1,7 +1,7 @@
 ---
 name: counter
 description: |
-  Use this agent to count lines of code and produce LOC statistics reports with file size limit enforcement.
+  Use this agent to count lines of code and produce LOC statistics reports with file size limit enforcement, for all languages or filtered to one (for example /loc-guardian:scan python). Not for suggesting how to shrink over-limit files; that is the optimizer agent's job.
 
   <example>
   Context: User wants to see code metrics for their project.
@@ -9,15 +9,6 @@ description: |
   assistant: "I'll use the counter agent to count lines of code."
   <commentary>
   Standard scan request — count all languages in the current directory.
-  </commentary>
-  </example>
-
-  <example>
-  Context: User wants LOC for a specific language.
-  user: "/loc-guardian:scan python"
-  assistant: "I'll use the counter agent to count Python lines of code."
-  <commentary>
-  Language-filtered scan — only count Python files.
   </commentary>
   </example>
 model: haiku
