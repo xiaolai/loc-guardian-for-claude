@@ -39,7 +39,22 @@ scripts/
 skills/
   loc/SKILL.md                   — Tokei conventions, metric definitions, report formats
   loc-optimization/SKILL.md      — Config file format, generic optimization patterns
+.codex-plugin/plugin.json        — Codex manifest; `"commands": []` stops Codex auto-migrating commands/
+codex-config.json                — interface overrides for the build-codex.mjs bootstrap
+codex/
+  AGENTS.md                      — Codex-side notes: skill map and differences from Claude Code
+  skills/                        — hand-polished Codex skills (loc-guardian-scan, -init, -counter,
+                                   -optimizer, -loc, -loc-optimization)
 ```
+
+## Codex layout
+
+`codex/` is hand-polished, not generated: do not re-run `build-codex.mjs --force` over it.
+When a command, agent or skill changes, make the matching edit in `codex/skills/`. The Codex
+skills resolve the plugin root as three directories above their own `SKILL.md`, because Codex
+sets no `${CLAUDE_PLUGIN_ROOT}` in a skill's shell. Check the port with
+`codex debug prompt-input` under a temporary `CODEX_HOME`: the listed skills must be the four
+user-facing ones above (counter and optimizer are hidden from auto-selection) and no `source-command-*` entry.
 
 ## Skill Separation
 

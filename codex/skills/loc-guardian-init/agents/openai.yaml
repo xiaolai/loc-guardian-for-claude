@@ -1,0 +1,4 @@
+interface:
+  display_name: "LOC Guardian: Init"
+  short_description: "Set the per-file LOC limit and extraction rules for this project"
+  default_prompt: "Use $loc-guardian-init to configure loc-guardian for this project."

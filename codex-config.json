@@ -1,0 +1,15 @@
+{
+  "skillPrefix": "loc-guardian",
+  "interface": {
+    "displayName": "LOC Guardian",
+    "shortDescription": "Per-file pure-LOC limits with measured, file-specific extraction plans",
+    "longDescription": "Counts pure lines of code with tokei, enforces a per-file limit (default 350) with per-glob overrides and ignores, and — when files are over the limit — reads each one and proposes concrete extractions whose savings are measured with tokei rather than estimated. All arithmetic lives in a tested Node script, so no number in the report comes from the model. Config is shared with the Claude Code plugin at .claude/loc-guardian.local.md.",
+    "category": "Coding",
+    "capabilities": ["Read", "Write"],
+    "defaultPrompt": [
+      "Use $loc-guardian-scan to check this repo's per-file LOC limits.",
+      "Use $loc-guardian-init to set a LOC limit and extraction rules for this project.",
+      "Use $loc-guardian-scan typescript src to scan only TypeScript under src."
+    ]
+  }
+}

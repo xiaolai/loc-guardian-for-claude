@@ -67,6 +67,19 @@ Then install:
 
 Run `/loc-guardian:init` in your project to set your LOC limit and extraction rules
 
+### Codex CLI
+
+The same repository ships a Codex layout (`.codex-plugin/` and `codex/`):
+
+```bash
+codex plugin marketplace add xiaolai/claude-plugin-marketplace
+codex plugin add loc-guardian@xiaolai
+```
+
+In a Codex session, run `$loc-guardian-init`, then `$loc-guardian-scan`. Both tools run the
+same `scripts/reduce-loc.mjs` and share `.claude/loc-guardian.local.md`. Codex runs every step
+on the session model (no Haiku/Opus split); see `codex/AGENTS.md` for the differences.
+
 ## How it works
 
 1. **Counter** (haiku) — works out what to scan, runs tokei, relays the report. tokei's JSON

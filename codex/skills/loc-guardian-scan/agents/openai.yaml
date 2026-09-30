@@ -1,0 +1,4 @@
+interface:
+  display_name: "LOC Guardian: Scan"
+  short_description: "Count pure LOC, flag files over the limit, and get measured extraction plans"
+  default_prompt: "Use $loc-guardian-scan to check this repo's per-file LOC limits."
