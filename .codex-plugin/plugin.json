@@ -1,6 +1,6 @@
 {
   "name": "loc-guardian",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Enforce per-file pure LOC limits with measured optimization strategies — counts with tokei, flags violations, and proposes file-specific extractions whose savings are measured, not estimated",
   "author": {
     "name": "xiaolai"
