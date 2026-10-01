@@ -1,7 +1,7 @@
 {
   "name": "loc-guardian",
-  "version": "0.4.1",
-  "description": "Enforce per-file pure LOC limits with measured optimization strategies — counts with tokei, flags violations, and proposes file-specific extractions whose savings are measured, not estimated",
+  "version": "0.4.2",
+  "description": "Enforce per-file pure LOC limits with measured optimization strategies \u2014 counts with tokei, flags violations, and proposes file-specific extractions whose savings are measured, not estimated",
   "author": {
     "name": "xiaolai"
   },
@@ -21,7 +21,7 @@
   "interface": {
     "displayName": "LOC Guardian",
     "shortDescription": "Per-file pure-LOC limits with measured, file-specific extraction plans",
-    "longDescription": "Counts pure lines of code with tokei, enforces a per-file limit (default 350) with per-glob overrides and ignores, and — when files are over the limit — reads each one and proposes concrete extractions whose savings are measured with tokei rather than estimated. All arithmetic lives in a tested Node script, so no number in the report comes from the model. Config is shared with the Claude Code plugin at .claude/loc-guardian.local.md.",
+    "longDescription": "Counts pure lines of code with tokei, enforces a per-file limit (default 350) with per-glob overrides and ignores, and \u2014 when files are over the limit \u2014 reads each one and proposes concrete extractions whose savings are measured with tokei rather than estimated. All arithmetic lives in a tested Node script, so no number in the report comes from the model. Config is shared with the Claude Code plugin at .claude/loc-guardian.local.md.",
     "developerName": "xiaolai",
     "category": "Coding",
     "capabilities": [

@@ -132,3 +132,10 @@ The extraction rules are yours — tailored to your language, framework, and con
 ## License
 
 ISC
+
+## Enforcement boundary
+
+Installation makes the scan available; it does not register an automatic write or commit hook.
+Use the deterministic CLI pipeline above in CI when the limit must be enforced. Invoke the optimizer
+only for files that need design judgment. Keep cohesive modules intact and use an explicit per-path
+limit for a justified exception rather than splitting a file solely to make the number smaller.
